@@ -1,0 +1,103 @@
+<!-- 告诉浏览器这是一个html5的网页-->
+<!DOCTYPE html>
+<html>
+<head>
+<!--网页的编码,与html4写法不同-->
+<meta charset="utf-8">
+</head>
+<h1>Html5练习</h1>
+<body onkeydown="move()">
+<!--这是一个画布标签，我们可以在这个区域绘制图形, 坦克大战的战场-->
+<canvas id="tankMap" width="400px" height="300px"style="background-color:black">
+</canvas>
+<!--把tanke_1.js引入到本页面-->
+<script type="text/javascript" src="tanke_1.js"></script>
+<script type="text/javascript">
+//得到画布
+var canvas1=document.getElementById("tankMap");
+//得到绘图上下文（可以理解为画笔）
+
+var cxt=canvas1.getContext("2d");
+//我的坦克  
+var hero = new Hero(140,140,0,heroColor);
+//定义一个空子弹
+var heroBullets=new Array();
+//敌人的坦克（放在数组中）
+var enemyTanks=new Array();
+//定义敌人子弹的数组
+
+var enemyBullets=new Array();
+//定义一个炸弹数组（可以存放很多炸弹）
+var bombs = new Array();
+
+for (var i = 0; i < 3; i++) {
+	//创建一个坦克
+	var enemyTank = new EnemyTank((i+1)*50,0,2,EnemyColor);
+	//把这个坦克放入到数组
+	enemyTanks[i]=enemyTank;
+	//启动这个敌人的坦克
+	window.setInterval("enemyTanks["+i+"].run()",50);
+
+	//当创建敌人坦克时就分配子弹
+	var eb=new Bullet(enemyTanks[i].x+9,enemyTanks[i].y+30,2,1.2,"enemy",enemyTanks[i]);
+	enemyBullets[i]=eb;
+	//启动该子弹
+	var ettimer=window.setInterval("enemyBullets["+i+"].run()",50);
+	enemyBullets[i].timer=ettimer;
+};
+flashTankMap();//打开页面时先刷新
+//专门写一个函数，用于定时刷新我们的作战区
+//把要在作战区出现的元素（自己的坦克，敌人的坦克，子弹，炸弹，障碍物）
+function flashTankMap(){
+	cxt.clearRect(0,0,400,300);//清理画布
+	//我的坦克
+	drawTanke(hero);//初始化坦克
+	//画出自己的子弹
+	//子弹飞效果
+	drawHeroBullet();
+
+	//敌人的坦克
+	//判断一下敌人坦克是否击中
+	isHitEnemyTank();
+	drawEnemyBomb();
+	drawEnemyBullet();
+
+	//敌人的坦克
+	//画出所有坦克
+	for (var i = 0; i < 3; i++) {
+	//画出这个坦克
+		drawTanke(enemyTanks[i]);
+	}
+}
+
+function move () {
+	//判断键盘按下的是什么键
+	//当按下键盘后，事件—>event对象->事件处理函数
+	//让小球动即按下键盘后重新绘制图形
+	var code=event.keyCode;//得到的是对应的ascii码
+	switch(code){
+		case 87:
+			hero.moveUp();
+			break;
+		case 68:
+			hero.moveRight();
+			break;
+		case 83:
+			hero.moveDown();
+			break;
+		case 65:
+			hero.moveLeft();
+			break;
+		case 74:
+			hero.shotEnemy();
+			break;
+	}
+	//重新绘制所有的坦克
+	flashTankMap();
+}
+//每隔100ms刷新一次作战区
+window.setInterval("flashTankMap()",100);
+//把这个timer赋给这个子弹(js对象)
+</script>
+</body>
+</html>
